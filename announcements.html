@@ -1,0 +1,86 @@
+<style>
+    h4 {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    h6 {
+        font-size: 1.2rem;
+        font-weight: normal;
+    }
+
+    p {
+        font-size: 1rem;
+    }
+
+    .column {
+        float: left;
+        width: 100%;
+        padding: 10px;
+    }
+
+    /* Clear floats after the columns */
+
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+</style>
+<div class="container-fluid pt-0">
+    <div class="row">
+        <div class="col text-left pt-0 pl-0">
+            <h6 id="otPageHeading" class="otDarkText mb-1"></h6>
+            <div class="col-sm-12 WhiteBG" id="currAnnouncements"></div>
+        </div>
+    </div>
+</div>
+</main>
+</div>
+<script>
+
+    let annonIcon = "";
+    let today = new Date();
+    let announPageLink = "https://website/Pages/Current%20Announcements.aspx";
+    console.log(today.toLocaleString("en-US"));
+    getItems("('Announcements')/Items?$select=Id,Title,StartDate,ShortDescription,PageLink,AnnouncementType,DownloadLink&$top=10&$filter=Release eq 1 and Expires ge '" + today.toISOString() + "'",
+        function (items) {
+            if (items.length > 0) {
+                let annonsString = "<table class='annonTable' width='100%'><tbody>";
+                for (let i = 0; i < items.length; i++) {
+                    switch (items[i].AnnouncementType) {
+                        case "Conference Call":
+                            annonIcon = "/site/PublishingImages/Icon_Announcement_ConferenceCall.png";
+                            break;
+                        case "Event":
+                            annonIcon = "/site/PublishingImages/Icon_Announcement_Event.png";
+                            break;
+                        case "Information":
+                            annonIcon = "/site/PublishingImages/Icon_Announcement_Featured.png";
+                            break;
+                        case "Reminder":
+                            annonIcon = "/site/PublishingImages/Icon_Announcement_Reminder.png";
+                            break;
+                        case "Training":
+                            annonIcon = "/site/PublishingImages/Icon_OnTrac_DataCenter.png";
+                            break;
+                        case "Webinar":
+                            annonIcon = "/site/PublishingImages/Icon_Announcement_Webinar.png";
+                            break;
+                        default:
+                            annonIcon = "/site/PublishingImages/Icon_Announcement_Reminder.png";
+                    }
+                    console.log(items[i].DownloadLink);
+                    annonsString += "<tr><td width='5%'><img title='" + items[i].AnnouncementType + "' src='" + annonIcon + "' height='30' width='30'></td>" +
+                        "<td class='py-3' width='90%'><a href='" + items[i].DownloadLink + "'><h4>" + items[i].Title + "</h4></a></br>" +
+                        items[i].ShortDescription + "</td><td width='5%'>" + items[i].StartDate.substr(5, 2) + "/" + items[i].StartDate.substr(8, 2) + "/" +
+                        items[i].StartDate.substr(0, 4) + "</td></tr>"
+                }
+                jQuery("#currAnnouncements").html(annonsString + "</tbody></table>");
+            } else {
+                console.error("No Announcements found!");
+            }
+        },
+        function () {
+            console.error("Error getting Announcements!");
+        });
+</script>
