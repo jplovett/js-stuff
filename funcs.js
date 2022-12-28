@@ -8,21 +8,21 @@ let otCurrUser = {
 };
 let otPageTitle;
 
-window.addEventListener('unload', function() {
+window.addEventListener('unload', function () {
     SetFullScreenMode(false);
 });
 
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
     SetFullScreenMode(true);
 });
 
-jQuery(document).ready(function() {
+jQuery(document).ready(function () {
     console.info("doc ready");
     //otPageTitle = otPage.substring(0, otPage.length - 5).replace(/-/g, " "); 
     //> chop off the file extension and replace dashes or %20 with a space
     jQuery("#reNav").load("https://website/SiteAssets/cewp/OT/reNav.html");
 });
-SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function() {
+SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function () {
     console.info("Initiating SP.ClientContext");
     const otPageTitle = "On-TRAC:" + otPage.replaceAll('-', ' ').substring(0, otPage.length - 5);
     console.info(otPageTitle);
@@ -31,7 +31,7 @@ SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function() {
 SP.SOD.executeOrDelayUntilScriptLoaded(ClientContextLoaded, "sp.js");
 
 function ClientContextLoaded() {
-    IsCurrentUserOTStaff(function(result) {
+    IsCurrentUserOTStaff(function (result) {
         if (result) {
             jQuery(".spShowHide").show();
             jQuery(".adminBtn").show();
@@ -112,10 +112,10 @@ function getItems(url, success) {
         headers: {
             "accept": "application/json;odata=verbose"
         },
-        success: function(data) {
+        success: function (data) {
             success(data.d.results);
         },
-        error: function() {
+        error: function () {
             console.error("getItems function error! (Check columns name/case and the list name format");
         }
     });
@@ -126,10 +126,10 @@ function logUserActivity(uEmail, uID, Title) {
     let itemProperties = { 'Title': Title, 'SiteUserEmail': uEmail, 'SiteUserID': parseInt(uID) };
     //create item
     createListItem('SiteUserActivity', itemProperties,
-        function(entity) {
+        function (entity) {
             //console.info(entity);
         },
-        function(error) {
+        function (error) {
             console.error("logUserActivity function error!");
             console.error(JSON.stringify(error));
         }
@@ -150,10 +150,10 @@ function createListItem(listName, itemProperties, success) {
             "Accept": "application/json;odata=verbose",
             "X-RequestDigest": jQuery("#__REQUESTDIGEST").val()
         },
-        success: function(data) {
+        success: function (data) {
             success(data.d);
         },
-        error: function(error) {
+        error: function (error) {
             console.error("createListItem function error!");
             console.error(JSON.stringify(error));
         }
@@ -167,7 +167,7 @@ function getItemTypeForListName(name) {
 
 function getSearchParams(k) {
     var p = {};
-    location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(s, k, v) { p[k] = v })
+    location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (s, k, v) { p[k] = v })
     return k ? p[k] : p;
 }
 
@@ -182,7 +182,7 @@ function dynamicSort(property) {
         sortOrder = -1;
         property = property.substr(1);
     }
-    return function(a, b) {
+    return function (a, b) {
         var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
     }
@@ -200,10 +200,10 @@ function deleteDocLibFile(libTitle, fileID) {
                 "X-RequestDigest": jQuery("#__REQUESTDIGEST").val(),
                 "If-Match": "*"
             },
-            success: function(data) {
+            success: function (data) {
                 return data;
             },
-            error: function(data) {
+            error: function (data) {
                 alert("Failed to delete document: " + fileID);
                 console.error('File delete request from SP list ' + libTitle + 'failed.');
             }
@@ -226,3 +226,72 @@ function msieversion() {
         return false;
     }
 }
+
+function getUserTitle(id) {
+    let userTitle = "";
+    getUser(id,
+        function (props) {
+            let n = props[0].Title.indexOf(" (");
+            if (n != -1) {
+                userTitle = props[0].Title.substring(0, n).trim().capitalize();
+            } else {
+                userTitle = props[0].Title;
+            }
+        },
+        function () {
+            console.error("Error finding SP user data!");
+            userTitle = null;
+        });
+    return userTitle;
+}
+
+function getUser(id, success) {
+    jQuery.ajax({
+        url: apiUrl + "/web/siteusers?$filter=Id eq " + id,
+        type: "GET",
+        async: false,
+        headers: {
+            "accept": "application/json;odata=verbose",
+        },
+        success: function(data) {
+            success(data.d.results);
+        },
+        error: function(error) {
+            console.error("getUser function error!");
+            console.error(JSON.stringify(error));
+        }
+    });
+}
+
+function getItemsArray(data) {
+    if (data.d.results.length > 0) {
+        return data.d.results;
+    }
+    else {
+        return "";
+    }
+}
+function getItemsTable(data, tableName) {
+    let fullresult = "<table id='" + tableName + "'><thead><tr><th>ID</th><th>Description</th></tr></thead>";
+    if (data.d.results.length > 0) {
+        var results = data.d.results;
+        for (var i = 0; i < results.length; i++) {
+            fullresult += "<tr><td>" + results[i].ID + "</td><td>" + results[i].Descrip + '</td></tr>';
+        }
+        return fullresult += "</table>";
+    }
+    else {
+        return "No Data Found in List!";
+    }
+}
+function getItemsFail(err) {
+    alert(responseText);
+    console.error(err);
+}
+
+//capitalize first letter of words
+String.prototype.capitalize = function () {
+    return this.toLowerCase().replace(/\b\w/g, function (m) {
+        return m.toUpperCase();
+    });
+};
