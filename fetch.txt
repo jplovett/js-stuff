@@ -1,0 +1,46 @@
+let response = await fetch(url);
+
+if (response.ok) { // if HTTP-status is 200-299
+  // get the response body (the method explained below)
+  let json = await response.json();
+} else {
+  alert("HTTP-Error: " + response.status);
+}
+
+
+get the response body, we need to use an additional method call.
+
+Response provides multiple promise-based methods to access the body in various formats:
+
+response.text() – read the response and return as text,
+response.json() – parse the response as JSON,
+response.formData() – return the response as FormData object (explained in the next chapter),
+response.blob() – return the response as Blob (binary data with type),
+response.arrayBuffer() – return the response as ArrayBuffer (low-level representation of binary data),
+additionally, response.body is a ReadableStream object, it allows you to read the body chunk-by-chunk, we’ll see an example later.
+For instance, let’s get a JSON-object with latest commits from GitHub:
+
+For instance, let’s get a JSON-object with latest commits from GitHub:
+
+
+let url = 'https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits';
+let response = await fetch(url);
+
+let commits = await response.json(); // read response body and parse as JSON
+
+alert(commits[0].author.login);
+
+
+Or, the same without await, using pure promises syntax:
+
+
+fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits')
+  .then(response => response.json())
+  .then(commits => alert(commits[0].author.login));
+To get the response text, await response.text() instead of .json():
+
+let response = await fetch('https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits');
+
+let text = await response.text(); // read response body as text
+
+alert(text.slice(0, 80) + '...');
