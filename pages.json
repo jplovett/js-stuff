@@ -1,0 +1,27 @@
+[
+    {
+        "name": "index.html",
+        "title": "Home",
+        "id": 0
+    },
+    {
+        "name": "contact.html",
+        "title": "Contact",
+        "id": 1
+    },
+    {
+        "name": "projects.html",
+        "title": "Projects",
+        "id": 2
+    },
+    {
+        "name": "history.html",
+        "title": "Photos History",
+        "id": 3
+    },
+    {
+        "name": "registration.html",
+        "title": "Dates & Registration",
+        "id": 4
+    }
+]
