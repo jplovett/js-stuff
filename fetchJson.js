@@ -1,4 +1,6 @@
-    fetch('https://jplovett.net/bfcwestmetro/code/pages.json')
+let href = document.location.href;
+let lastPathSegment = href.substring(href.lastIndexOf('/') + 1);
+fetch('https://jplovett.net/bfcwestmetro/code/pages.json')
         .then(response => {
             if (!response.ok) {
                 throw new Error("HTTP error " + response.status);
